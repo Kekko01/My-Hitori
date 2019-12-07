@@ -1,6 +1,7 @@
 # My Hitori
 ## English
-A version of  "Hitori" game made by me, created during the course "Fondamenti di Programmazione (Modulo 1)" by Michele Tomaiuolo in Università degli Studi di Parma
+A version of the "Hitori" game made by me, created during the course "Fundamentals of Programming (Module 1)" by Michele Tomaiuolo at the University of Parma
+
 ------------
 
 
