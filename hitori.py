@@ -61,13 +61,13 @@ class Hitori(BoardGame):
                 listcolannots.append(str(self._annots[j*self._dimension+i]))
 
             for k in range(self._dimension):
+                r1=listrow[k]
+                r1annots=listrowannots[k]
+                c1=listcol[k]
+                c1annots=listcolannots[k]
                 for x in range(k+1,self._dimension):
-                    r1=listrow[k]
-                    r1annots=listrowannots[k]
                     r2=listrow[x]
                     r2annots=listrowannots[x]
-                    c1=listcol[k]
-                    c1annots=listcolannots[k]
                     c2=listcol[x]
                     c2annots=listcolannots[x]
                     #print("Riga",r1,r2,"\nColonna",c1,c2,"\n")
@@ -83,10 +83,16 @@ class Hitori(BoardGame):
         for y in range(self._dimension):
             for x in range(self._dimension):
                 if self._annots[y*self._dimension+x]=="BLACK":
-                    if y - 1 >= 0 and self._annots[(y-1)*self._dimension+x]=="BLACK":
+                    if (
+                        y >= 1
+                        and self._annots[(y - 1) * self._dimension + x] == "BLACK"
+                    ):
                         #print("Celle nere affianco",x,y)
                         return False
-                    if x - 1 >= 0 and self._annots[y*self._dimension+(x-1)]=="BLACK":
+                    if (
+                        x >= 1
+                        and self._annots[y * self._dimension + (x - 1)] == "BLACK"
+                    ):
                         #print("Celle nere affianco",x,y)
                         return False
                     if y + 1 < self._dimension and self._annots[(y+1)*self._dimension+x]=="BLACK":
@@ -105,15 +111,8 @@ class Hitori(BoardGame):
         cellblank[i]==True
         x,y=i%self._dimension,i//self._dimension
         self.countcell(cellblank,x,y)
-        cellcountannots=0
-        for i in self._annots:
-            if i!="BLACK":
-                cellcountannots+=1
-        countcellblank=0
-        for i in cellblank:
-            if i:
-                countcellblank+=1
-
+        cellcountannots = sum(i != "BLACK" for i in self._annots)
+        countcellblank = sum(1 for i in cellblank if i)
         #print(cellcountannots,countcellblank)
 
         if cellcountannots!=countcellblank:
@@ -122,13 +121,21 @@ class Hitori(BoardGame):
         return True
 
     def countcell(self,matrix,x,y):
-        if y-1>=0 and self._annots[(y-1)*self._dimension+x]!="BLACK" and not matrix[(y-1)*self._dimension+x]:
+        if (
+            y >= 1
+            and self._annots[(y - 1) * self._dimension + x] != "BLACK"
+            and not matrix[(y - 1) * self._dimension + x]
+        ):
             matrix[(y-1)*self._dimension+x]=True
             self.countcell(matrix,x,y-1)
         if y+1<self._dimension and self._annots[(y+1)*self._dimension+x]!="BLACK" and not matrix[(y+1)*self._dimension+x]:
             matrix[(y+1)*self._dimension+x]=True
             self.countcell(matrix,x,y+1)
-        if x-1>=0 and self._annots[y*self._dimension+(x-1)]!="BLACK" and not matrix[y*self._dimension+(x-1)]:
+        if (
+            x >= 1
+            and self._annots[y * self._dimension + (x - 1)] != "BLACK"
+            and not matrix[y * self._dimension + (x - 1)]
+        ):
             matrix[y*self._dimension+(x-1)]=True
             self.countcell(matrix,x-1,y)
         if x+1<self._dimension and self._annots[y*self._dimension+(x+1)]!="BLACK" and not matrix[y*self._dimension+(x+1)]:
@@ -153,10 +160,18 @@ class Hitori(BoardGame):
             for y in range(self._dimension):
                 for x in range(self._dimension):
                     if self._annots[y*self._dimension+x]=="BLACK":
-                        if y - 1 >= 0 and self._annots[(y-1)*self._dimension+x]=="CLEAR":
+                        if (
+                            y >= 1
+                            and self._annots[(y - 1) * self._dimension + x]
+                            == "CLEAR"
+                        ):
                             self.flag_at(x,y-1)
                             whilecounter+=1
-                        if x - 1 >= 0 and self._annots[y*self._dimension+(x-1)]=="CLEAR":
+                        if (
+                            x >= 1
+                            and self._annots[y * self._dimension + (x - 1)]
+                            == "CLEAR"
+                        ):
                             self.flag_at(x-1,y)
                             whilecounter+=1
                         if y + 1 < self._dimension and self._annots[(y+1)*self._dimension+x]=="CLEAR":
@@ -183,9 +198,7 @@ class Hitori(BoardGame):
         #print("Entro nel checkdiagonal")
         matrixcheck=[]
         for y in range(self._dimension):
-            row=[]
-            for x in range(self._dimension):
-                row.append(str(x)+" "+str(y))
+            row = [f"{str(x)} {str(y)}" for x in range(self._dimension)]
             matrixcheck.append(row)
         for offset in range(-self._dimension+2,self._dimension-1):
             diagonalcheck=diagonal(matrixcheck,offset=offset)
@@ -214,26 +227,17 @@ class Hitori(BoardGame):
         if self.wrong():
             print("Non entro nel ciclo")
             return
-        #with open("test.txt","a") as target:
-            #print("Entrato nel Help",file=target)
         test=0
         mosse=1
-        #while mosse>0:
-        giro=0
-        for k in range(self._dimension**2):
-            giro+=1
+        for _ in range(self._dimension**2):
             #print("Giro di Help",giro)
             mosse=0
-            #with open("test.txt","a") as target:
-                #test+=1
-                #print("Giro",test)
-                #print("!!GIRO!!",test,file=target)
             for y in range(self._dimension):
                 for x in range(self._dimension):
-                    backup=self._annots[:]
                     if self._annots[y*self._dimension+x]=="CLEAR":
                         self.play_at(x,y)
                         self.mark()
+                        backup=self._annots[:]
                         if self.wrong():
                             self._annots=backup[:]
                             self.flag_at(x,y)
@@ -277,10 +281,16 @@ class Hitori(BoardGame):
         for y in range(self._dimension):
             for x in range(self._dimension):
                 if self._annots[y*self._dimension+x]=="BLACK":
-                    if y - 1 >= 0 and self._annots[(y-1)*self._dimension+x]=="BLACK":
+                    if (
+                        y >= 1
+                        and self._annots[(y - 1) * self._dimension + x] == "BLACK"
+                    ):
                         #print("Celle nere affianco",x,y)
                         return True
-                    if x - 1 >= 0 and self._annots[y*self._dimension+(x-1)]=="BLACK":
+                    if (
+                        x >= 1
+                        and self._annots[y * self._dimension + (x - 1)] == "BLACK"
+                    ):
                         #print("Celle nere affianco",x,y)
                         return True
                     if y + 1 < self._dimension and self._annots[(y+1)*self._dimension+x]=="BLACK":
@@ -298,15 +308,8 @@ class Hitori(BoardGame):
         cellblank[i]==True
         x,y=i%self._dimension,i//self._dimension
         self.countcell(cellblank,x,y)
-        cellcountannots=0
-        for i in self._annots:
-            if i!="BLACK":
-                cellcountannots+=1
-        countcellblank=0
-        for i in cellblank:
-            if i:
-                countcellblank+=1
-
+        cellcountannots = sum(i != "BLACK" for i in self._annots)
+        countcellblank = sum(1 for i in cellblank if i)
         #print(cellcountannots,countcellblank)
 
         if cellcountannots!=countcellblank:
@@ -327,13 +330,13 @@ class Hitori(BoardGame):
                 listcolannots.append(str(self._annots[j*self._dimension+i]))
 
             for k in range(self._dimension):
+                r1=listrow[k]
+                r1annots=listrowannots[k]
+                c1=listcol[k]
+                c1annots=listcolannots[k]
                 for x in range(k+1,self._dimension):
-                    r1=listrow[k]
-                    r1annots=listrowannots[k]
                     r2=listrow[x]
                     r2annots=listrowannots[x]
-                    c1=listcol[k]
-                    c1annots=listcolannots[k]
                     c2=listcol[x]
                     c2annots=listcolannots[x]
                     #print("Riga",r1,r2,"\nColonna",c1,c2,"\n")
@@ -365,7 +368,7 @@ def main():
     #with open("checkdiagonal.txt","w") as target:
             #print(file=target)
     with open("tables/config.txt") as target:
-        file="tables/"+target.readline().strip()
+        file = f"tables/{target.readline().strip()}"
     play=Hitori(file)
     gui_play(play)
     #console_play(play)
